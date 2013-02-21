@@ -1,4 +1,4 @@
-package edu.unm.ece.drake.rectifier;
+package edu.unm.ece.informatics.rectifier;
 
 import org.w3c.dom.Document;
 

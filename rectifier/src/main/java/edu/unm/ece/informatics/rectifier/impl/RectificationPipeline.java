@@ -1,8 +1,8 @@
-package edu.unm.ece.drake.rectifier.impl;
+package edu.unm.ece.informatics.rectifier.impl;
 
 import org.w3c.dom.Document;
 
-import edu.unm.ece.drake.rectifier.DocumentPipeline;
+import edu.unm.ece.informatics.rectifier.DocumentPipeline;
 
 public class RectificationPipeline implements DocumentPipeline {
 
