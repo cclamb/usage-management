@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class RectificationPipelineTest {
@@ -27,11 +28,13 @@ public class RectificationPipelineTest {
 	}
 
 	@Test
+	@Ignore
 	public void testRectificationPipeline() {
 		fail("Not yet implemented");
 	}
 
 	@Test
+	@Ignore
 	public void testExecute() {
 		fail("Not yet implemented");
 	}
