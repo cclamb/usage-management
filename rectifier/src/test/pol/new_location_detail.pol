@@ -1,0 +1,20 @@
+policy_set {
+   policy(:default) {
+    rule(:mission_affiliation) { |ma| ma == :tropic_thunder }
+   }
+   policy(:description) {
+    include :default
+    rule(:category) { |c| c == :magenta }
+    rule(:sensitivity) { |s| s == :top_secret || s == :secret }
+   }
+   policy(:history) {
+    include :default
+    rule(:category) { |c| c == :magenta }
+    rule(:sensitivity) { |s| s == :top_secret }
+   }
+   policy(:location) {
+    include :default
+    rule(:category) { |c| c == :vermillion }
+    rule(:sensitivity) { |s| s == :top_secret }
+   }
+  }
