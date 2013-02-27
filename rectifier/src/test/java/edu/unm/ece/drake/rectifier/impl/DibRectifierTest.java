@@ -21,6 +21,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import edu.unm.ece.informatics.rectifier.Context;
@@ -34,6 +37,8 @@ public class DibRectifierTest {
 		= "src/test/xml/new_location_detail.xml";
 	private static final String policyFilename 
 		= "src/test/pol/new_location_detail.pol";
+	private static final String dataObjectFileName 
+		= "src/test/xml/new_location_data_object.xml";
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
@@ -96,12 +101,48 @@ public class DibRectifierTest {
 		assertNotNull(content);
 		final Context ctx = new TestContext();
 		final DibRectifier rectifier = new DibRectifier(ctx);
-		final Document doc = rectifier.extractDocument(content);
-		System.out.println(doc.getClass().toString());
-		assertNotNull(doc);
-		//final String testPolicy = loadPolicy(new File(policyFilename));
-		//assertEquals(policy.replaceAll("\\s",""), 
-		//		testPolicy.replaceAll("\\s",""));
+		final NodeList nodes = rectifier.extractDocument(content);
+		
+		assertNotNull(nodes);
+		
+		final Document testDoc = loadContent(new File(dataObjectFileName));
+		final NodeList testChildren = testDoc.getChildNodes();
+		assert testChildren != null : "unexpected null test children";
+		
+		assertEquals(traverseNodes(nodes), traverseNodes(testChildren));
+	}
+	
+	private String traverseNodes(final NodeList nodes) {
+		final StringBuilder builder = new StringBuilder();
+		for (int i = 0; i < nodes.getLength(); i++) {
+	        builder.append(traverseNode(nodes.item(i)));
+	    }
+		return builder.toString();
+	}
+	
+	private String traverseNode(final Node node) {
+		final StringBuilder builder = new StringBuilder();
+		builder.append(String.format("Name: %s\n", node.getNodeName()));
+		if (node.getNodeValue() != null) {
+			builder.append(String.format("Value: %s\n", node.getNodeValue()));
+		}
+		if (node.hasAttributes() == true) {
+			final NamedNodeMap attrs = node.getAttributes();
+			builder.append(String.format("Attributes:"));
+			for (int i = 0; i < attrs.getLength(); i++) {
+				final Node item = attrs.item(i);
+				builder.append(String.format("\t%s = %s\n", item.getNodeName(), item.getNodeValue()));
+			} 
+		}
+		builder.append("------\n");
+		if (node.hasChildNodes() == false) {
+			return builder.toString();
+		}
+		final NodeList children = node.getChildNodes();
+		for (int i = 0; i < children.getLength(); i++) {
+			builder.append(traverseNode(children.item(i)));
+		}
+		return builder.toString();
 	}
 	
 	private Document loadContent(final File file) 

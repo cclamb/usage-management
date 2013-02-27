@@ -1,10 +1,7 @@
 package edu.unm.ece.informatics.rectifier.impl;
 
 import java.io.IOException;
-import java.io.StringReader;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
@@ -12,7 +9,7 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
-import org.xml.sax.InputSource;
+import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import edu.unm.ece.informatics.rectifier.Context;
@@ -30,7 +27,7 @@ public final class DibRectifier implements DocumentRectifier {
 	public Document rectify(final Document original) {
 		// TODO Auto-generated method stub
 		String policy;
-		Document doc;
+		NodeList doc;
 		try {
 			policy = extractPolicy(original);
 			doc = extractDocument(original);
@@ -50,7 +47,7 @@ public final class DibRectifier implements DocumentRectifier {
 		return (String) expr.evaluate(original, XPathConstants.STRING);
 	}
 	
-	public Document extractDocument(final Document original)
+	public NodeList extractDocument(final Document original)
 			throws XPathExpressionException, 
 			SAXException, 
 			IOException, 
@@ -58,13 +55,9 @@ public final class DibRectifier implements DocumentRectifier {
 		final XPathExpression expr = XPathFactory.newInstance()
 				.newXPath()
 				.compile("/artifact/data-object");
-		final String strContent 
-			= expr.evaluate(original); //, XPathConstants.STRING);
-		final DocumentBuilderFactory builderFactory 
-			= DocumentBuilderFactory.newInstance();
-		final DocumentBuilder builder = builderFactory.newDocumentBuilder();
-		System.out.println(strContent);
-		return builder.parse(new InputSource(new StringReader(strContent)));
+		final NodeList content 
+			= (NodeList) expr.evaluate(original, XPathConstants.NODESET);
+		return content;
 	}
 
 }
