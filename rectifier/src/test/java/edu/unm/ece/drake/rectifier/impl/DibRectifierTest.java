@@ -86,6 +86,24 @@ public class DibRectifierTest {
 				testPolicy.replaceAll("\\s",""));
 	}
 	
+	@Test
+	public void testContentExtraction()
+			throws XPathExpressionException, 
+			ParserConfigurationException, 
+			SAXException, 
+			IOException {
+		final Document content = loadContent(new File(contentFilename));
+		assertNotNull(content);
+		final Context ctx = new TestContext();
+		final DibRectifier rectifier = new DibRectifier(ctx);
+		final Document doc = rectifier.extractDocument(content);
+		System.out.println(doc.getClass().toString());
+		assertNotNull(doc);
+		//final String testPolicy = loadPolicy(new File(policyFilename));
+		//assertEquals(policy.replaceAll("\\s",""), 
+		//		testPolicy.replaceAll("\\s",""));
+	}
+	
 	private Document loadContent(final File file) 
 				throws ParserConfigurationException, SAXException, IOException {
 		final DocumentBuilderFactory builderFactory 
