@@ -10,15 +10,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.xpath.XPathExpressionException;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -35,26 +34,12 @@ public class DibRectifierTest {
 	
 	private static final String contentFilename 
 		= "src/test/xml/new_location_detail.xml";
+	
 	private static final String policyFilename 
 		= "src/test/pol/new_location_detail.pol";
+	
 	private static final String dataObjectFileName 
 		= "src/test/xml/new_location_data_object.xml";
-
-	@BeforeClass
-	public static void setUpBeforeClass() throws Exception {
-	}
-
-	@AfterClass
-	public static void tearDownAfterClass() throws Exception {
-	}
-
-	@Before
-	public void setUp() throws Exception {
-	}
-
-	@After
-	public void tearDown() throws Exception {
-	}
 
 	@Test
 	public void testDibRectifier() {
@@ -112,6 +97,32 @@ public class DibRectifierTest {
 		assertEquals(traverseNodes(nodes), traverseNodes(testChildren));
 	}
 	
+	@Test
+	public void testJRubyPolicyEval() throws ScriptException {
+		final String testPolicy = loadPolicy(new File(policyFilename));
+		final String evaluator = loadPolicy(new File("src/main/ruby/policy_evaluator.rb"));
+		
+		final StringBuilder programBuilder = new StringBuilder(evaluator)
+			.append("policy = '")
+			.append(testPolicy).append("'").append("\n")
+			.append("puts policy");
+//			.append("evaluator = Util::PolicyEvaluator.new(:one) do").append("\n")
+//			.append("\t").append("instance_eval(policy)").append("\n")
+//			.append("end").append("\n")
+//			.append("ctx = evaluator.ctx").append("\n");
+		
+		System.out.println(programBuilder);
+		
+		final ScriptEngine engine = new ScriptEngineManager()
+			.getEngineByName("jruby");
+		assert engine != null : "engine should be valid";
+		
+		engine.eval(programBuilder.toString());
+		
+		engine.eval("puts 1 + 2");
+		
+	}
+	
 	private String traverseNodes(final NodeList nodes) {
 		final StringBuilder builder = new StringBuilder();
 		for (int i = 0; i < nodes.getLength(); i++) {
@@ -159,7 +170,7 @@ public class DibRectifierTest {
 		{
 			String sCurrentLine;
 			while ((sCurrentLine = br.readLine()) != null) {
-				builder.append(sCurrentLine);
+				builder.append(sCurrentLine).append("\n");
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
