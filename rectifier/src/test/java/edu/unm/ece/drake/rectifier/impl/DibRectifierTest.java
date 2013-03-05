@@ -105,13 +105,13 @@ public class DibRectifierTest {
 		final StringBuilder programBuilder = new StringBuilder(evaluator)
 			.append("policy = '")
 			.append(testPolicy).append("'").append("\n")
-			.append("puts policy");
-//			.append("evaluator = Util::PolicyEvaluator.new(:one) do").append("\n")
-//			.append("\t").append("instance_eval(policy)").append("\n")
-//			.append("end").append("\n")
-//			.append("ctx = evaluator.ctx").append("\n");
+//			.append("puts policy").append("\n")
+			.append("evaluator = PolicyEvaluator.new(:one) do").append("\n")
+			.append("\t").append("instance_eval policy").append("\n")
+			.append("end").append("\n")
+			.append("ctx = evaluator.ctx").append("\n");
 		
-		System.out.println(programBuilder);
+		System.out.println(programBuilder.toString());
 		
 		final ScriptEngine engine = new ScriptEngineManager()
 			.getEngineByName("jruby");
