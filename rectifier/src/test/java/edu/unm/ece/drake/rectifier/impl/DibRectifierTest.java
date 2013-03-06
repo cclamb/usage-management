@@ -109,7 +109,7 @@ public class DibRectifierTest {
 			.append("evaluator = PolicyEvaluator.new(:one) do").append("\n")
 			.append("\t").append("instance_eval policy").append("\n")
 			.append("end").append("\n")
-			.append("ctx = evaluator.ctx").append("\n");
+			.append("$ctx = evaluator.ctx").append("\n");
 		
 		System.out.println(programBuilder.toString());
 		
@@ -118,6 +118,10 @@ public class DibRectifierTest {
 		assert engine != null : "engine should be valid";
 		
 		engine.eval(programBuilder.toString());
+		
+		final Object nv = engine.getContext().getAttribute("ctx"); 
+		
+		System.out.println(nv.toString());
 		
 		engine.eval("puts 1 + 2");
 		
