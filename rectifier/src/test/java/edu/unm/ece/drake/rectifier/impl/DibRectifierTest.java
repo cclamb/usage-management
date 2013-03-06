@@ -32,13 +32,22 @@ class TestContext extends HashMap<String, String> implements Context {}
 
 public class DibRectifierTest {
 	
-	private static final String contentFilename 
+	private static final String TEST_CONTEXT_FILENAME 
+		= "src/main/ruby/test_context.rb";
+
+	private static final String UMM_FILENAME 
+		= "src/main/ruby/usage_management_mechanism.rb";
+
+	private static final String POLICY_EVALUATOR_FILENAME 
+		= "src/main/ruby/policy_evaluator.rb";
+
+	private static final String CONTENT_FILENAME 
 		= "src/test/xml/new_location_detail.xml";
 	
-	private static final String policyFilename 
+	private static final String POLICY_FILENAME 
 		= "src/test/pol/new_location_detail.pol";
 	
-	private static final String dataObjectFileName 
+	private static final String DATA_OBJECT_FILENAME 
 		= "src/test/xml/new_location_data_object.xml";
 
 	@Test
@@ -50,7 +59,7 @@ public class DibRectifierTest {
 	@Test
 	public void testRectify() 
 			throws ParserConfigurationException, SAXException, IOException {
-		final Document content = loadContent(new File(contentFilename));
+		final Document content = loadContent(new File(CONTENT_FILENAME));
 		assertNotNull(content);
 		final Context ctx = new TestContext();
 		final DibRectifier rectifier = new DibRectifier(ctx);
@@ -65,13 +74,13 @@ public class DibRectifierTest {
 			ParserConfigurationException, 
 			SAXException, 
 			IOException {
-		final Document content = loadContent(new File(contentFilename));
+		final Document content = loadContent(new File(CONTENT_FILENAME));
 		assertNotNull(content);
 		final Context ctx = new TestContext();
 		final DibRectifier rectifier = new DibRectifier(ctx);
 		final String policy = rectifier.extractPolicy(content);
 		assertNotNull(policy);
-		final String testPolicy = loadPolicy(new File(policyFilename));
+		final String testPolicy = loadPolicy(new File(POLICY_FILENAME));
 		assertEquals(policy.replaceAll("\\s",""), 
 				testPolicy.replaceAll("\\s",""));
 	}
@@ -82,7 +91,7 @@ public class DibRectifierTest {
 			ParserConfigurationException, 
 			SAXException, 
 			IOException {
-		final Document content = loadContent(new File(contentFilename));
+		final Document content = loadContent(new File(CONTENT_FILENAME));
 		assertNotNull(content);
 		final Context ctx = new TestContext();
 		final DibRectifier rectifier = new DibRectifier(ctx);
@@ -90,7 +99,7 @@ public class DibRectifierTest {
 		
 		assertNotNull(nodes);
 		
-		final Document testDoc = loadContent(new File(dataObjectFileName));
+		final Document testDoc = loadContent(new File(DATA_OBJECT_FILENAME));
 		final NodeList testChildren = testDoc.getChildNodes();
 		assert testChildren != null : "unexpected null test children";
 		
@@ -99,10 +108,14 @@ public class DibRectifierTest {
 	
 	@Test
 	public void testJRubyPolicyEval() throws ScriptException {
-		final String testPolicy = loadPolicy(new File(policyFilename));
-		final String evaluator = loadPolicy(new File("src/main/ruby/policy_evaluator.rb"));
+		final String testPolicy = loadPolicy(new File(POLICY_FILENAME));
+		final String evaluator = loadPolicy(new File(POLICY_EVALUATOR_FILENAME));
+		final String umm = loadPolicy(new File(UMM_FILENAME));
+		final String ctx = loadPolicy(new File(TEST_CONTEXT_FILENAME));
 		
 		final StringBuilder programBuilder = new StringBuilder(evaluator)
+			.append(umm)
+			.append(ctx)
 			.append("policy = '")
 			.append(testPolicy).append("'").append("\n")
 //			.append("puts policy").append("\n")
@@ -123,7 +136,7 @@ public class DibRectifierTest {
 		
 		System.out.println(nv.toString());
 		
-		engine.eval("puts 1 + 2");
+		engine.eval("puts \"Returned context: #{$ctx.to_s}\"");
 		
 	}
 	
