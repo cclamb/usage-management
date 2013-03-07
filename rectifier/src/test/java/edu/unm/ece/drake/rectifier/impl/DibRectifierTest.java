@@ -40,7 +40,13 @@ public class DibRectifierTest {
 
 	private static final String POLICY_EVALUATOR_FILENAME 
 		= "src/main/ruby/policy_evaluator.rb";
-
+	
+	private static final String RECTIFIER_FILENAME 
+		= "src/main/ruby/content_rectifier.rb";
+	
+	private static final String INITIALIZER_FILENAME 
+		= "src/main/ruby/initialize.rb";
+	
 	private static final String CONTENT_FILENAME 
 		= "src/test/xml/new_location_detail.xml";
 	
@@ -111,10 +117,14 @@ public class DibRectifierTest {
 		final String testPolicy = loadPolicy(new File(POLICY_FILENAME));
 		final String evaluator = loadPolicy(new File(POLICY_EVALUATOR_FILENAME));
 		final String umm = loadPolicy(new File(UMM_FILENAME));
+		final String rectifier = loadPolicy(new File(RECTIFIER_FILENAME));
+		final String initializer = loadPolicy(new File(INITIALIZER_FILENAME));
 		final String ctx = loadPolicy(new File(TEST_CONTEXT_FILENAME));
 		
 		final StringBuilder programBuilder = new StringBuilder(evaluator)
+			.append(initializer)
 			.append(umm)
+			.append(rectifier)
 			.append(ctx)
 			.append("policy = '")
 			.append(testPolicy).append("'").append("\n")
@@ -122,21 +132,25 @@ public class DibRectifierTest {
 			.append("evaluator = PolicyEvaluator.new(:one) do").append("\n")
 			.append("\t").append("instance_eval policy").append("\n")
 			.append("end").append("\n")
-			.append("$ctx = evaluator.ctx").append("\n");
+			.append("policy = evaluator.ctx").append("\n")
+			.append("umm = UsageManagementMechanism.new").append("\n")
+			.append("$result = umm.execute?(policy, Base_Context[:link], :transmit)").append("\n");
 		
-		System.out.println(programBuilder.toString());
+		programBuilder.append("\n")
+			.append("r = ContentRectifier.new :umm => umm, :confidentiality_strategy => :redact").append("\n")
+			.append("puts r.to_s");
+		
+		//System.out.println(programBuilder.toString());
 		
 		final ScriptEngine engine = new ScriptEngineManager()
 			.getEngineByName("jruby");
 		assert engine != null : "engine should be valid";
 		
-		engine.eval(programBuilder.toString());
-		
-		final Object nv = engine.getContext().getAttribute("ctx"); 
-		
-		System.out.println(nv.toString());
-		
-		engine.eval("puts \"Returned context: #{$ctx.to_s}\"");
+		//engine.eval(programBuilder.toString());
+		//final Object nv = engine.getContext().getAttribute("result"); 
+		//System.out.println(nv.toString());
+		//engine.eval("puts \"Returned context: #{$ctx.to_s}\"");
+		engine.eval(initializer);
 		
 	}
 	

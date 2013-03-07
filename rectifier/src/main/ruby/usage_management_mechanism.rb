@@ -1,3 +1,5 @@
+require 'set'
+
 class UsageManagementMechanism
 
   def execute? rules, ctx = {}, activity = :transmit
