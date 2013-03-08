@@ -1,10 +1,15 @@
 require 'rubygems'
+require 'rubygems/dependency_installer'
 
-begin
-  require 'openssl'
-  require 'base64'
-  require 'nokogiri'
-rescue LoadError => err
-  puts "ERROR: #{err.to_s}\n"
-  raise
+def require_or_install name
+  begin
+    require name
+  rescue LoadError
+    puts "ERROR: no #{name}\n"
+    Gem::DependencyInstaller.new.install name
+  end
 end
+
+require_or_install 'openssl'
+require_or_install 'base64'
+require_or_install 'nokogiri'
