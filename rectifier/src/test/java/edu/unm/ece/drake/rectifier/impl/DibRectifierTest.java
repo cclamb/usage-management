@@ -86,7 +86,7 @@ public class DibRectifierTest {
 		final DibRectifier rectifier = new DibRectifier(ctx);
 		final String policy = rectifier.extractPolicy(content);
 		assertNotNull(policy);
-		final String testPolicy = loadPolicy(new File(POLICY_FILENAME));
+		final String testPolicy = loadFile(new File(POLICY_FILENAME));
 		assertEquals(policy.replaceAll("\\s",""), 
 				testPolicy.replaceAll("\\s",""));
 	}
@@ -114,18 +114,20 @@ public class DibRectifierTest {
 	
 	@Test
 	public void testJRubyPolicyEval() throws ScriptException {
-		final String testPolicy = loadPolicy(new File(POLICY_FILENAME));
-		final String evaluator = loadPolicy(new File(POLICY_EVALUATOR_FILENAME));
-		final String umm = loadPolicy(new File(UMM_FILENAME));
-		final String rectifier = loadPolicy(new File(RECTIFIER_FILENAME));
-		final String initializer = loadPolicy(new File(INITIALIZER_FILENAME));
-		final String ctx = loadPolicy(new File(TEST_CONTEXT_FILENAME));
+		final String testPolicy = loadFile(new File(POLICY_FILENAME));
+		final String evaluator = loadFile(new File(POLICY_EVALUATOR_FILENAME));
+		final String umm = loadFile(new File(UMM_FILENAME));
+		final String rectifier = loadFile(new File(RECTIFIER_FILENAME));
+		final String initializer = loadFile(new File(INITIALIZER_FILENAME));
+		final String ctx = loadFile(new File(TEST_CONTEXT_FILENAME));
+		final String content = loadFile(new File(CONTENT_FILENAME));
 		
 		final StringBuilder programBuilder = new StringBuilder(evaluator)
 			.append(initializer)
 			.append(umm)
 			.append(rectifier)
 			.append(ctx)
+			.append("content = '").append(content).append("'").append("\n")
 			.append("policy = '")
 			.append(testPolicy).append("'").append("\n")
 //			.append("puts policy").append("\n")
@@ -134,23 +136,29 @@ public class DibRectifierTest {
 			.append("end").append("\n")
 			.append("policy = evaluator.ctx").append("\n")
 			.append("umm = UsageManagementMechanism.new").append("\n")
-			.append("$result = umm.execute?(policy, Base_Context[:link], :transmit)").append("\n");
+			.append("$result = umm.execute?(policy, Base_Context[:link], :transmit)").append("\n")
+			.append("rectifier = ContentRectifier.new :umm => umm, :confidentiality_strategy => :encrypt").append("\n")
+			.append("$xml = rectifier.process :artifact => content, :context => Base_Context[:link]").append("\n");
+			//.append("puts xml");
 		
-		programBuilder.append("\n")
-			.append("r = ContentRectifier.new :umm => umm, :confidentiality_strategy => :redact").append("\n")
-			.append("puts r.to_s");
-		
-		//System.out.println(programBuilder.toString());
+		System.out.println(programBuilder.toString());
 		
 		final ScriptEngine engine = new ScriptEngineManager()
 			.getEngineByName("jruby");
 		assert engine != null : "engine should be valid";
 		
-		//engine.eval(programBuilder.toString());
+		engine.eval(programBuilder.toString());
+		
+		final Object result = engine.getContext().getAttribute("result");
+		System.out.format("RESULT: %s\n", result);
+		
+		final Object xml = engine.getContext().getAttribute("xml");
+		System.out.format("New XML: %s\n", xml);
+		
 		//final Object nv = engine.getContext().getAttribute("result"); 
 		//System.out.println(nv.toString());
 		//engine.eval("puts \"Returned context: #{$ctx.to_s}\"");
-		engine.eval(initializer);
+		//engine.eval(initializer);
 		
 	}
 	
@@ -195,7 +203,7 @@ public class DibRectifierTest {
 		return builder.parse(file);
 	}
 	
-	private String loadPolicy(final File file) {
+	private String loadFile(final File file) {
 		final StringBuilder builder = new StringBuilder();
 		try (final BufferedReader br = new BufferedReader(new FileReader(file)))
 		{

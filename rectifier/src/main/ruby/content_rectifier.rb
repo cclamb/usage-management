@@ -54,7 +54,11 @@ class ContentRectifier
 
         key = 'This is going to be my 256-bit key.'
         iv = 'This is goig to be my 256-bit initialization vector.'
-        type = 'AES-256-CBC'
+        
+        # We've used AES-256-CBC, but that's under export control and requires
+        # additional java configuration.  For simplicity, we have downgraded
+        # to 128 bit encryption.
+        type = 'AES-128-CBC'
 
         if section['type'] == 'encrypted'
           # dissassemble
@@ -115,7 +119,7 @@ class ContentRectifier
 
 end
 
-class Garden::Util::NilContentRectifier
+class NilContentRectifier
   def process args
     # Domain::ComponentFactory::instance.create_system_log(self).info '...in NilContentRectifier...'
     args[:artifact]
