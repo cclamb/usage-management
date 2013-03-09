@@ -7,8 +7,7 @@ def require_or_install name
   $__retry_count__ = 0
   begin
     require name
-  rescue LoadError
-    puts "ERROR: no #{name}\n"
+  rescue LoadError => err
     Gem::DependencyInstaller.new.install name
     if $__retry_count__ <= RETRY_LIMIT
       $__retry_count__ = $__retry_count__ + 1
@@ -20,4 +19,5 @@ end
 
 require_or_install 'openssl'
 require_or_install 'base64'
+require_or_install 'isorelax'
 require_or_install 'nokogiri'

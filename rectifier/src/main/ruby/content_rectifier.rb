@@ -60,19 +60,23 @@ class ContentRectifier
         # to 128 bit encryption.
         type = 'AES-128-CBC'
 
-        if section['type'] == 'encrypted'
-          # dissassemble
+        # This is essentially a small state machine.
+        is_clear = @umm.execute? evaluator.ctx[policy_name.to_sym], args[:context], :transmit
+        is_enciphered = section['status'] == 'encrypt'
+        secure_line = is_enciphered && is_clear
+
+        if secure_line 
+          # decrypt; first remove base64 encoding, then decipher.
           edata64 = section.content
-          edata = Base64::decode64 edata64
+          edata = Base64.decode64 edata64
           content = decrypt edata, key, iv, type
           section.remove_attribute 'status'
           section.content = content
-        end
-
-        unless @umm.execute? evaluator.ctx[policy_name.to_sym], args[:context], :transmit
+        else
+          # encrypt; encipher, then apply base64 encoding.
           content = section.content
           edata = encrypt content, key, iv, type
-          edata64 = Base64::encode64 edata
+          edata64 = Base64.encode64 edata
           section['status'] = 'encrypt'
           section.content = edata64
         end 

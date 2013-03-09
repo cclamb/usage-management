@@ -155,9 +155,9 @@ public class DibRectifierTest {
 		final Object xml = engine.getContext().getAttribute("xml");
 		System.out.format("New XML: %s\n", xml);
 		
-		//final Object nv = engine.getContext().getAttribute("result"); 
-		//System.out.println(nv.toString());
-		//engine.eval("puts \"Returned context: #{$ctx.to_s}\"");
+		final Object nv = engine.getContext().getAttribute("result"); 
+		System.out.println(nv.toString());
+		engine.eval("puts \"Returned context: #{$ctx.to_s}\"");
 		//engine.eval(initializer);
 		
 	}
