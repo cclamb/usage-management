@@ -114,15 +114,8 @@ public class DibRectifierTest {
 		final StringBuilder programBuilder = new StringBuilder(ummModule)
 			.append(ctx)
 			.append("content = '").append(content).append("'").append("\n")
-			.append("policy = '")
-			.append(testPolicy).append("'").append("\n")
-//			.append("puts policy").append("\n")
-			.append("evaluator = PolicyEvaluator.new(:one) do").append("\n")
-			.append("\t").append("instance_eval policy").append("\n")
-			.append("end").append("\n")
-			.append("policy = evaluator.ctx").append("\n")
+			.append("policy = '").append(testPolicy).append("'").append("\n")
 			.append("umm = UsageManagementMechanism.new").append("\n")
-			.append("$result = umm.execute?(policy, Base_Context[:link], :transmit)").append("\n")
 			.append("rectifier = ContentRectifier.new :umm => umm, :confidentiality_strategy => :encrypt").append("\n")
 			.append("$xml = rectifier.process :artifact => content, :context => Base_Context[:link]").append("\n");
 			//.append("puts xml");
