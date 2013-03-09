@@ -10,6 +10,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -32,20 +33,11 @@ class TestContext extends HashMap<String, String> implements Context {}
 
 public class DibRectifierTest {
 	
+	private static final String UMM_MODULE_FILENAME 
+		= "src/main/ruby/umm_system.rb";
+	
 	private static final String TEST_CONTEXT_FILENAME 
 		= "src/main/ruby/test_context.rb";
-
-	private static final String UMM_FILENAME 
-		= "src/main/ruby/usage_management_mechanism.rb";
-
-	private static final String POLICY_EVALUATOR_FILENAME 
-		= "src/main/ruby/policy_evaluator.rb";
-	
-	private static final String RECTIFIER_FILENAME 
-		= "src/main/ruby/content_rectifier.rb";
-	
-	private static final String INITIALIZER_FILENAME 
-		= "src/main/ruby/initialize.rb";
 	
 	private static final String CONTENT_FILENAME 
 		= "src/test/xml/new_location_detail.xml";
@@ -115,17 +107,11 @@ public class DibRectifierTest {
 	@Test
 	public void testJRubyPolicyEval() throws ScriptException {
 		final String testPolicy = loadFile(new File(POLICY_FILENAME));
-		final String evaluator = loadFile(new File(POLICY_EVALUATOR_FILENAME));
-		final String umm = loadFile(new File(UMM_FILENAME));
-		final String rectifier = loadFile(new File(RECTIFIER_FILENAME));
-		final String initializer = loadFile(new File(INITIALIZER_FILENAME));
 		final String ctx = loadFile(new File(TEST_CONTEXT_FILENAME));
 		final String content = loadFile(new File(CONTENT_FILENAME));
+		final String ummModule = loadFile(new File(UMM_MODULE_FILENAME));
 		
-		final StringBuilder programBuilder = new StringBuilder(evaluator)
-			.append(initializer)
-			.append(umm)
-			.append(rectifier)
+		final StringBuilder programBuilder = new StringBuilder(ummModule)
 			.append(ctx)
 			.append("content = '").append(content).append("'").append("\n")
 			.append("policy = '")
