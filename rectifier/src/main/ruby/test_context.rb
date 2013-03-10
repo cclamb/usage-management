@@ -1,4 +1,4 @@
-Base_Context = { 
+{ 
 	:link => {
 		:sensitivity => :secret,
 		:category => :magenta,

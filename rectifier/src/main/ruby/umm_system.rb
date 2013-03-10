@@ -24,7 +24,7 @@ dependencies = ['openssl', 'base64', 'isorelax', 'nokogiri']
 
 # We will load and then attempt to require to check module load.
 # We limit this to three attempts however.
-RETRY_LIMIT = 3
+$retry_limit = 3
 
 # Module installer.
 def require_or_install name
@@ -35,7 +35,7 @@ def require_or_install name
     puts "...loading #{name}..."
     Gem::DependencyInstaller.new.install name
     puts "done.\n"
-    if $__retry_count__ <= RETRY_LIMIT
+    if $__retry_count__ <= $retry_limit
       $__retry_count__ = $__retry_count__ + 1
       puts "retrying require..."
       retry

@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
+import javax.script.ScriptContext;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -28,10 +29,12 @@ import edu.unm.ece.informatics.rectifier.Context;
 import edu.unm.ece.informatics.rectifier.DocumentRectifier;
 import edu.unm.ece.informatics.rectifier.RectificationException;
 
-public final class RubyRectifier implements DocumentRectifier {
+public class RubyRectifier implements DocumentRectifier {
 	
 	private static final String UMM_MODULE_FILENAME 
 		= "src/main/ruby/umm_system.rb";
+	
+	private ScriptEngine rubyEngine;
 	
 	private final Context ctx;
 	
@@ -39,64 +42,47 @@ public final class RubyRectifier implements DocumentRectifier {
 		this.ctx = ctx;
 	}
 
+	protected ScriptEngine getRubyEngine() throws ScriptException {
+		if (rubyEngine == null) {
+			final String ummModule = loadStringFromFile(new File(UMM_MODULE_FILENAME));
+			rubyEngine = new ScriptEngineManager().getEngineByName("jruby");
+			rubyEngine.eval(ummModule);
+		}
+		return rubyEngine;
+	}
+	
 	@Override
 	public Document rectify(final Document original) throws RectificationException {
-		final String ummModule = loadStringFromFile(new File(UMM_MODULE_FILENAME));
 		final String testPolicy = ctx.get("currentContext");
-		
-//		System.out.println(testPolicy);
 		
 		String content;
 		try {
-			content = loadXMLStringFromDocument(original);
-		} catch (final TransformerException e) {
-			throw new RectificationException(e);
-		}
-		
-		final ScriptEngine engine = new ScriptEngineManager()
-			.getEngineByName("jruby");
-		
-		final StringBuilder programBuilder = new StringBuilder(ummModule)
-			.append(testPolicy).append("\n")
-			.append("content = '").append(content).append("'").append("\n")
-			.append("policy = '").append(testPolicy).append("'").append("\n")
-			.append("umm = UsageManagementMechanism.new").append("\n")
-			.append("rectifier = ContentRectifier.new :umm => umm, :confidentiality_strategy => :encrypt").append("\n")
-			.append("$xml = rectifier.process :artifact => content, :context => Base_Context[:link]").append("\n");
+			content = loadStringFromDocument(original);
 
-		//System.out.println(programBuilder);
-		
+			final ScriptEngine engine = getRubyEngine();
+			
+			engine.getContext().setAttribute("content", content, ScriptContext.ENGINE_SCOPE);
+			
+			final StringBuilder programBuilder = new StringBuilder() //new StringBuilder(ummModule)
+				.append("$context = ").append(testPolicy).append("\n")
+				//.append("$content = '").append(content).append("'").append("\n")
+				//.append("policy = '").append(testPolicy).append("'").append("\n")
+				.append("umm = UsageManagementMechanism.new").append("\n")
+				.append("rectifier = ContentRectifier.new :umm => umm, :confidentiality_strategy => :encrypt").append("\n")
+				.append("$xml = rectifier.process :artifact => $content, :context => $context[:link]").append("\n");
 
-		try {
 			engine.eval(programBuilder.toString());
-		} catch (final ScriptException e) {
-			throw new RectificationException(e);
-		}
-		
-		final Object xml = engine.getContext().getAttribute("xml");
-		
-		System.out.println(xml.toString());
-		
-		try {
-			return loadXMLFromString(xml.toString());
-		} catch (final ParserConfigurationException | SAXException | IOException e) {
-			throw new RectificationException(e);
-		}
-		
-//		String policy;
-//		NodeList doc;
-//		try {
-//			policy = extractPolicy(original);
-//			doc = extractDocument(original);
-//		} catch (XPathExpressionException | SAXException | IOException | ParserConfigurationException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+			
+			final Object xml = engine.getContext().getAttribute("xml");
 
-		//return null;
+			return loadDocumentFromString(xml.toString());
+			
+		} catch (final ScriptException | TransformerException | ParserConfigurationException | SAXException | IOException e) {
+			throw new RectificationException(e);
+		}
 	}
 	
-	private String loadXMLStringFromDocument(final Document document) 
+	protected String loadStringFromDocument(final Document document) 
 			throws TransformerException {
 		TransformerFactory transfac = TransformerFactory.newInstance();
 		Transformer trans = transfac.newTransformer();
@@ -112,7 +98,7 @@ public final class RubyRectifier implements DocumentRectifier {
 		return sw.toString();
 	}
 	
-	private Document loadXMLFromString(final String xml) 
+	protected Document loadDocumentFromString(final String xml) 
 			throws ParserConfigurationException, SAXException, IOException
     {
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -121,7 +107,7 @@ public final class RubyRectifier implements DocumentRectifier {
         return builder.parse(is);
     }
 	
-	private String loadStringFromFile(final File file) {
+	protected String loadStringFromFile(final File file) {
 		final StringBuilder builder = new StringBuilder();
 		try (final BufferedReader br = new BufferedReader(new FileReader(file)))
 		{
@@ -134,26 +120,5 @@ public final class RubyRectifier implements DocumentRectifier {
 		}
 		return builder.toString();	
 	}
-	
-//	public String extractPolicy(final Document original) 
-//			throws XPathExpressionException {
-//		final XPathExpression expr = XPathFactory.newInstance()
-//				.newXPath()
-//				.compile("/artifact/policy-set");
-//		return (String) expr.evaluate(original, XPathConstants.STRING);
-//	}
-//	
-//	public NodeList extractDocument(final Document original)
-//			throws XPathExpressionException, 
-//			SAXException, 
-//			IOException, 
-//			ParserConfigurationException {
-//		final XPathExpression expr = XPathFactory.newInstance()
-//				.newXPath()
-//				.compile("/artifact/data-object");
-//		final NodeList content 
-//			= (NodeList) expr.evaluate(original, XPathConstants.NODESET);
-//		return content;
-//	}
 
 }
