@@ -3,8 +3,12 @@ package edu.unm.ece.drake.rectifier.impl;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.HashMap;
 
 import javax.script.ScriptEngine;
@@ -40,10 +44,16 @@ public class RubyRectifierTest {
 	
 	private static final String POLICY_FILENAME 
 		= "src/test/pol/new_location_detail.pol";
+	
+	protected Reader getUmmReader() throws FileNotFoundException {
+		final File ummModule = new File(UMM_MODULE_FILENAME);
+		return new BufferedReader(new FileReader(ummModule));
+	}
 
 	@Test
-	public void testDibRectifier() {
-		final RubyRectifier rectifier = new RubyRectifier(new TestContext());
+	public void testDibRectifier() throws FileNotFoundException {
+		
+		final RubyRectifier rectifier = new RubyRectifier(new TestContext(), getUmmReader());
 		assertNotNull(rectifier);
 	}
 
@@ -59,7 +69,7 @@ public class RubyRectifierTest {
 		final String env = Util.loadFile(new File(TEST_CONTEXT_FILENAME));
 		final Context ctx = new TestContext();
 		ctx.put("currentContext", env);
-		final RubyRectifier rectifier = new RubyRectifier(ctx);
+		final RubyRectifier rectifier = new RubyRectifier(ctx, getUmmReader());
 		final Document rectifiedContent = rectifier.rectify(content);
 		
 		//System.out.println(loadXMLStringFromDocument(rectifiedContent));

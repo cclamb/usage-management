@@ -1,9 +1,8 @@
 package edu.unm.ece.informatics.rectifier.impl;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 
@@ -31,22 +30,21 @@ import edu.unm.ece.informatics.rectifier.RectificationException;
 
 public class RubyRectifier implements DocumentRectifier {
 	
-	private static final String UMM_MODULE_FILENAME 
-		= "src/main/ruby/umm_system.rb";
-	
 	private ScriptEngine rubyEngine;
 	
 	private final Context ctx;
 	
-	public RubyRectifier(final Context ctx) {
+	private Reader ummReader;
+	
+	public RubyRectifier(final Context ctx, final Reader ummReader) {
 		this.ctx = ctx;
+		this.ummReader = ummReader;
 	}
 
-	protected ScriptEngine getRubyEngine() throws ScriptException {
+	protected ScriptEngine getRubyEngine() throws ScriptException, FileNotFoundException {
 		if (rubyEngine == null) {
-			final String ummModule = loadStringFromFile(new File(UMM_MODULE_FILENAME));
 			rubyEngine = new ScriptEngineManager().getEngineByName("jruby");
-			rubyEngine.eval(ummModule);
+			rubyEngine.eval(ummReader);
 		}
 		return rubyEngine;
 	}
@@ -77,7 +75,7 @@ public class RubyRectifier implements DocumentRectifier {
 
 			return loadDocumentFromString(xml.toString());
 			
-		} catch (final ScriptException | TransformerException | ParserConfigurationException | SAXException | IOException e) {
+		} catch (final Exception e) {
 			throw new RectificationException(e);
 		}
 	}
@@ -106,19 +104,5 @@ public class RubyRectifier implements DocumentRectifier {
         InputSource is = new InputSource(new StringReader(xml));
         return builder.parse(is);
     }
-	
-	protected String loadStringFromFile(final File file) {
-		final StringBuilder builder = new StringBuilder();
-		try (final BufferedReader br = new BufferedReader(new FileReader(file)))
-		{
-			String sCurrentLine;
-			while ((sCurrentLine = br.readLine()) != null) {
-				builder.append(sCurrentLine).append("\n");
-			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		return builder.toString();	
-	}
 
 }
