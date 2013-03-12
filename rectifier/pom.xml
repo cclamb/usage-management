@@ -37,5 +37,28 @@
    <artifactId>jruby-complete</artifactId>
    <version>1.7.3</version>
   </dependency>
+  <dependency>
+   <groupId>org.osgi</groupId>
+   <artifactId>org.osgi.core</artifactId>
+   <version>4.3.1</version>
+  </dependency>
  </dependencies>
+ 
+ <build>
+  <plugins>
+   <plugin>
+     <groupId>org.apache.felix</groupId>
+     <artifactId>maven-bundle-plugin</artifactId>
+     <extensions>true</extensions>
+     <configuration>
+       <instructions>
+         <Export-Package>edu.unm.ece.informatics.rectifier</Export-Package>
+         <Private-Package>edu.unm.ece.informatics.rectifier.impl</Private-Package>
+         <Bundle-Activator>edu.unm.ece.informatics.rectifier.impl.RectifierActivator</Bundle-Activator>
+       </instructions>
+     </configuration>
+   </plugin>
+  </plugins>
+ </build>
+ 
 </project>
