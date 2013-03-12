@@ -50,9 +50,11 @@ public class RubyRectifier implements DocumentRectifier {
 	
 	private ScriptEngine rubyEngine;
 	
-	private final Context ctx;
+	private Context ctx;
 	
 	private Reader ummReader;
+	
+	public RubyRectifier() {}
 	
 	public RubyRectifier(final Context ctx, final Reader ummReader) {
 		this.ctx = ctx;
